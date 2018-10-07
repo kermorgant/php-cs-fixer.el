@@ -45,6 +45,9 @@
 (defvar php-cs-fixer--args '()
   "List of args to send to php-cs-fixer command.")
 
+(defvar php-cs-fixer--enable t
+  "Control whether code style fixing should happen.")
+
 (defun php-cs-fixer--get-config-dir ()
   "Return config directory of php-cs-fixer."
   (directory-file-name
@@ -55,35 +58,36 @@
 (defun  php-cs-fixer--fix ()
   "Replace the source code in the current file."
   (interactive)
-  (let ((tmpfile (make-temp-file "php-cs-fixer" nil ".php"))
-        (patchbuf (get-buffer-create "*PhpCsFixer patch*"))
-        (msgbuf (get-buffer-create "*PhpCsFixer messages*"))
-        (sourcebuffer (current-buffer))
-        (coding-system-for-read 'utf-8)
-        (coding-system-for-write 'utf-8))
+  (when php-cs-fixer--enable
+    (let ((tmpfile (make-temp-file "php-cs-fixer" nil ".php"))
+          (patchbuf (get-buffer-create "*PhpCsFixer patch*"))
+          (msgbuf (get-buffer-create "*PhpCsFixer messages*"))
+          (sourcebuffer (current-buffer))
+          (coding-system-for-read 'utf-8)
+          (coding-system-for-write 'utf-8))
 
-    (unwind-protect
-        (save-restriction
-          (widen)
-          (with-current-buffer patchbuf
-            (erase-buffer))
+      (unwind-protect
+          (save-restriction
+            (widen)
+            (with-current-buffer patchbuf
+              (erase-buffer))
 
-          (with-temp-file tmpfile
-            (insert-buffer-substring-no-properties sourcebuffer))
+            (with-temp-file tmpfile
+              (insert-buffer-substring-no-properties sourcebuffer))
 
-          (if (zerop (apply 'call-process php-cs-fixer--executable nil msgbuf t
-                            (append (list "fix")
-                                    php-cs-fixer--args
-                                    (php-cs-fixer--get-config-arg)
-                                    (list tmpfile))))
-              (if (zerop (call-process-region (point-min) (point-max) "diff" nil patchbuf nil "-n" "-" tmpfile))
-                  (message "Buffer was unchanged by php-cs-fixer")
-                (php-cs-fixer--apply-rcs-patch patchbuf)
-                (message "Buffer modified by php-cs-fixer"))
-            (message "php-cs-fixer exited in error")))
+            (if (zerop (apply 'call-process php-cs-fixer--executable nil msgbuf t
+                              (append (list "fix")
+                                      php-cs-fixer--args
+                                      (php-cs-fixer--get-config-arg)
+                                      (list tmpfile))))
+                (if (zerop (call-process-region (point-min) (point-max) "diff" nil patchbuf nil "-n" "-" tmpfile))
+                    (message "Buffer was unchanged by php-cs-fixer")
+                  (php-cs-fixer--apply-rcs-patch patchbuf)
+                  (message "Buffer modified by php-cs-fixer"))
+              (message "php-cs-fixer exited in error")))
 
-      (kill-buffer patchbuf)
-      (delete-file tmpfile))))
+        (kill-buffer patchbuf)
+        (delete-file tmpfile)))))
 
 (defun php-cs-fixer--get-config-arg ()
   "Look for a config file and return relevant cli argument if found."

@@ -1,5 +1,5 @@
-* php-cs-fixer.el - wrapper for PHP Coding Standards Fixer
-  This package intergates PHP-CS-Fixer into emacs.
+* Emacs wrapper for PHP-CS-Fixer
+  This package intergates PHP Coding Standards Fixer into Emacs.
 
   *NOTICE*: This package is in development.
 
@@ -12,3 +12,12 @@
    :load-path "~/src/php-cs-fixer.el"
    :config (setq php-cs-fixer--executable "~/.config/composer/vendor/bin/php-cs-fixer"))
 #+END_SRC
+
+** Usage
+
+Run ~php-cs-fixer--fix~ to fix code style for the current buffer. In
+case a .php_cs or .php_cs.dist file is found in the project root (as
+guessed by php-project), it will be used.
+
+In case you setup a ~before-save-hook~, you might want
+to tune ~php-cs-fixer--enable~ to control on which projects it runs.
