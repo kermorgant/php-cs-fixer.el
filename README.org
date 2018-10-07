@@ -1,0 +1,14 @@
+* php-cs-fixer.el - wrapper for PHP Coding Standards Fixer
+  This package intergates PHP-CS-Fixer into emacs.
+
+  *NOTICE*: This package is in development.
+
+** Installation
+
+   You need to have PHP-CS-Fixer (https://github.com/FriendsOfPHP/PHP-CS-Fixer) installed
+
+   #BEGIN_SRC emacs-lisp
+   (use-package php-cs-fixer :ensure nil
+   :load-path "~/src/php-cs-fixer.el"
+   :config (setq php-cs-fixer--executable "~/.config/composer/vendor/bin/php-cs-fixer"))
+   #END_SRC
