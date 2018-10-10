@@ -7,17 +7,28 @@
 
    You need to have PHP-CS-Fixer (https://github.com/FriendsOfPHP/PHP-CS-Fixer) installed
 
+   If it is in your path, it should be detected automatically.
+
+*** configuration with use-package
 #+BEGIN_SRC emacs-lisp
 (use-package php-cs-fixer :ensure nil
    :load-path "~/src/php-cs-fixer.el"
-   :config (setq php-cs-fixer--executable "~/.config/composer/vendor/bin/php-cs-fixer"))
+   :config (setq php-cs-fixer--enable nil)) ;; disable it globally if you plan to enable it per folder
 #+END_SRC
+
+*** fix style on save
+
+    With a buffer-local hook :
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'php-mode-hook
+            (lambda () (add-hook 'before-save-hook #'php-cs-fixer--fix nil 'local)))
+#+END_SRC
+
+In case you setup a ~before-save-hook~, you might want
+to tune ~php-cs-fixer--enable~ to control on which projects it runs.
 
 ** Usage
 
 Run ~php-cs-fixer--fix~ to fix code style for the current buffer. In
 case a .php_cs or .php_cs.dist file is found in the project root (as
 guessed by php-project), it will be used.
-
-In case you setup a ~before-save-hook~, you might want
-to tune ~php-cs-fixer--enable~ to control on which projects it runs.
