@@ -1,7 +1,8 @@
 * Emacs wrapper for PHP-CS-Fixer
   This package intergates PHP Coding Standards Fixer into Emacs.
 
-  *NOTICE*: This package is in development.
+  *NOTICE*: This package is in development and lacks testing, so use with caution.
+  Improvements or ideas are welcome.
 
 ** Installation
 
