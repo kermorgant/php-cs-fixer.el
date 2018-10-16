@@ -51,8 +51,17 @@
 (defun php-cs-fixer--get-config-dir ()
   "Return config directory of php-cs-fixer."
   (directory-file-name
-   (expand-file-name
-    (or php-cs-fixer--config-dir (php-project-get-root-dir)))))
+   (expand-file-name (php-project-get-root-dir))))
+
+(defun php-cs-fixer--find-executable ()
+  "Return path of php-cs-fixer executable."
+  (let ((executable php-cs-fixer--executable))
+    (unless executable
+      (setq executable (executable-find "php-cs-fixer"))
+      (unless executable (error "Could not find php-cs-fixer in path")))
+    (unless (file-exists-p executable)
+      (error (format "Could not find php-cs-fixer at path %s" executable)))
+    executable))
 
 ;;;###autoload
 (defun  php-cs-fixer--fix ()
