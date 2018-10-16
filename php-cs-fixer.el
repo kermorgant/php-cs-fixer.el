@@ -39,17 +39,17 @@
 (defvar php-cs-fixer--executable nil
   "The path to php-cs-fixer.")
 
-(defvar php-cs-fixer--config-dir nil
-  "The directory holding php-cs-fixer config file(s). When nil, it will be guessed.")
+(defvar php-cs-fixer--config-file nil
+  "The path to php-cs-fixer config file. When nil, will be guessed.")
 
 (defvar php-cs-fixer--args '()
-  "List of args to send to php-cs-fixer command.")
+  "List of args for php-cs-fixer command.")
 
 (defvar php-cs-fixer--enable t
-  "Control whether code style fixing should happen.")
+  "Control whether code style fixing happens or not.")
 
-(defun php-cs-fixer--get-config-dir ()
-  "Return config directory of php-cs-fixer."
+(defun php-cs-fixer--get-project-dir ()
+  "Return project directory."
   (directory-file-name
    (expand-file-name (php-project-get-root-dir))))
 
@@ -84,10 +84,11 @@
             (with-temp-file tmpfile
               (insert-buffer-substring-no-properties sourcebuffer))
 
-            (if (zerop (apply 'call-process php-cs-fixer--executable nil msgbuf t
+            (if (zerop (apply 'call-process (php-cs-fixer--find-executable) nil msgbuf t
                               (append (list "fix")
                                       php-cs-fixer--args
                                       (php-cs-fixer--get-config-arg)
+                                      (php-cs-fixer--get-cache-arg tmpfile)
                                       (list tmpfile))))
                 (if (zerop (call-process-region (point-min) (point-max) "diff" nil patchbuf nil "-n" "-" tmpfile))
                     (message "Buffer was unchanged by php-cs-fixer")
@@ -100,12 +101,22 @@
 
 (defun php-cs-fixer--get-config-arg ()
   "Look for a config file and return relevant cli argument if found."
-  (cond ((file-exists-p (f-join (php-cs-fixer--get-config-dir) ".php_cs"))
-         (list "--config" (f-join (php-cs-fixer--get-config-dir) ".php_cs")))
-        ((file-exists-p (f-join (php-cs-fixer--get-config-dir) ".php_cs.dist"))
-         (list "--config"(f-join (php-cs-fixer--get-config-dir) ".php_cs.dist")))
+  (if php-cs-fixer--config-file
+      (if (file-exists-p php-cs-fixer--config-file)
+          (list "--config" php-cs-fixer--config-file)
+        (error (format "php-cs-fixer config file %s not found" php-cs-fixer--config-file)))
+    (cond ((file-exists-p (f-join (php-cs-fixer--get-project-dir) ".php_cs"))
+           (list "--config" (f-join (php-cs-fixer--get-project-dir) ".php_cs")))
+          ((file-exists-p (f-join (php-cs-fixer--get-project-dir) ".php_cs.dist"))
+           (list "--config"(f-join (php-cs-fixer--get-project-dir) ".php_cs.dist")))
+          (t ()))))
+
+(defun php-cs-fixer--get-cache-arg (target)
+  "Return --using-cache argument, based on TARGET."
+  (cond ((file-exists-p target)
+         (list "--using-cache" "no"))
         (t ())))
-
+
 ;; this function was adapted from go-mode
 (defun php-cs-fixer--goto-line (line)
   "Goto line LINE."
