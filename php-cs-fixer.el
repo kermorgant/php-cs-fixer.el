@@ -58,7 +58,7 @@
   (let ((executable php-cs-fixer--executable))
     (unless executable
       (setq executable (executable-find "php-cs-fixer"))
-      (when (not executable (error "Could not find php-cs-fixer in path"))))
+      (unless executable (error "Could not find php-cs-fixer in path")))
     (unless (file-exists-p executable)
       (error (format "Could not find php-cs-fixer at path %s" executable)))
     executable))
