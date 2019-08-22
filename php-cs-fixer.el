@@ -45,7 +45,7 @@
 (defvar php-cs-fixer--args '()
   "List of args for php-cs-fixer command.")
 
-(defvar php-cs-fixer--enable t
+(defcustom php-cs-fixer--enable t
   "Control whether code style fixing happens or not.")
 
 (defun php-cs-fixer--get-project-dir ()
@@ -72,8 +72,9 @@
           (patchbuf (get-buffer-create "*PhpCsFixer patch*"))
           (msgbuf (get-buffer-create "*PhpCsFixer messages*"))
           (sourcebuffer (current-buffer))
-          (coding-system-for-read 'utf-8)
-          (coding-system-for-write 'utf-8))
+          ;; (coding-system-for-read 'utf-8)
+          ;; (coding-system-for-write 'utf-8)
+          )
 
       (unwind-protect
           (save-restriction
